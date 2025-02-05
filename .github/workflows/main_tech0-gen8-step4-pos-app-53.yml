@@ -31,9 +31,10 @@ jobs:
 
       - name: Copy artifact for deployment job
         run: |
-          mkdir deploy
+          mkdir -p deploy/.next/static  # 親ディレクトリも一緒に作成
           cp -r ./.next/static/. ./deploy/.next/static
           cp -r ./public ./deploy
+
 
 
 
