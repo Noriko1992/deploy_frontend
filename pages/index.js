@@ -1,105 +1,56 @@
 import { useState } from 'react';
 
 export default function Home() {
+  const [code, setCode] = useState('');
+  const [product, setProduct] = useState(null);
+  const [error, setError] = useState('');
 
-  //GETリクエストを送信
-  const [getResponse, setGetResponse] = useState('');
-
-  const handleGetRequest = async () => {
-    const res = await fetch('http://localhost:5000/api/hello', {
-      method: 'GET',
-    });
-    const data = await res.json();
-
-
-    // GETリクエストの結果をコンソールに表示
-    console.log("GETリクエストの結果:", data.message);
-
-    setGetResponse(data.message);
-  };
-
-  //動的なGETリクエストの送信
-  const [id, setId] = useState('');
-  const [idResponse, setIdResponse] = useState('');
-
-  // IDを指定してGETリクエストを送信
-  const handleIdRequest = async (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-
-    const res = await fetch(`http://localhost:5000/api/multiply/${id}`, {
-      method: 'GET',
-    });
-    const data = await res.json();
-
-    // IDリクエストの結果をコンソールに表示
-    console.log("IDリクエストの結果:", data.doubled_value);
-
-    setIdResponse(data.doubled_value);
+    setError('');
+    setProduct(null);
+  
+    try {
+      const res = await fetch(`http://localhost:8000/product/${code}`);
+      const data = await res.json();
+  
+      if (res.ok) {
+        // APIが200 OKなら商品情報をセット
+        setProduct({ name: data.name, price: data.price });
+      } else {
+        // APIが404 Not Foundならエラーメッセージを表示
+        setError('商品が見つかりませんでした');
+      }
+    } catch (err) {
+      console.error('エラー:', err);
+      setError('APIとの通信に失敗しました');
+    }
   };
-
-  //POSTリクエストを送信
-  const [input, setInput] = useState('');
-  const [postResponse, setPostResponse] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    //入力されたデータをコンソールに表示
-    console.log("入力情報:", input);
-
-    const res = await fetch('http://localhost:5000/api/echo', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ "message":input }),
-
-    });
-    console.log(JSON.stringify({ "message":input }));
-    const data = await res.json();
-
-    //バックエンドからのレスポンスをコンソールに表示
-    console.log("Backendからのお返事:", data.message);
-
-    setPostResponse(data.message);
-  };
-
 
   return (
-    <div>
+    <div style={{ padding: '20px' }}>
+      <h1>POSシステム</h1>
 
-      <h1>Next.jsとFlaskの連携アプリ</h1>
-
-      <h2>GETリクエストを送信</h2>
-      <button onClick={handleGetRequest}>GETリクエストを送信</button>
-      {getResponse && <p>サーバーからのGET応答: {getResponse}</p>}
-
-      <h2>IDを指定してGETリクエストを送信</h2>
-      <form onSubmit={handleIdRequest}>
-        <input
-          type="number"
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-          placeholder="IDを入力してください"
-        />
-        <button type="submit">送信</button>
-      </form>
-      {idResponse && <p>Flaskからの応答: {idResponse}</p>}
-
-      <h2>POSTリクエストを送信</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSearch}>
         <input
           type="text"
-          value={input}
-
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="テキストを入力してください"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder="商品コードを入力"
+          required
         />
-
-        <button type="submit">送信</button>
+        <button type="submit">コードを読み込む</button>
       </form>
-      {postResponse && <p>FlaskからのPOST応答: {postResponse}</p>}
 
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {product && (
+        <div>
+          <h2>商品情報</h2>
+          <p>商品名: {product.name}</p>
+          <p>単価: ¥{product.price}</p>
+        </div>
+      )}
     </div>
   );
 }
