@@ -29,14 +29,18 @@ jobs:
           npm run build --if-present
           npm run export --if-present
 
+      - name: Build project
+        env:
+          NEXT_PUBLIC_API_ENDPOINT: ${{ secrets.NEXT_PUBLIC_API_ENDPOINT }}
+        run: |
+          echo "NEXT_PUBLIC_API_ENDPOINT=${NEXT_PUBLIC_API_ENDPOINT}"
+          npm run build
+          
       - name: Copy artifact for deployment job
         run: |
           mkdir -p deploy/.next/static  # 親ディレクトリも一緒に作成
           cp -r ./.next/static/. ./deploy/.next/static
           cp -r ./public ./deploy
-
-
-
 
       - name: Zip artifact for deployment
         run: zip release.zip ./deploy –r
