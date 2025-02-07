@@ -9,16 +9,15 @@ export default function Home() {
     e.preventDefault();
     setError('');
     setProduct(null);
-  
+
     try {
-      const res = await fetch(`http://localhost:8000/product/${code}`);
+      // 本番環境のAPI URLを直接記述
+      const res = await fetch(`https://tech0-gen8-step4-pos-app-54.azurewebsites.net/product/${code}`);
       const data = await res.json();
-  
+
       if (res.ok) {
-        // APIが200 OKなら商品情報をセット
         setProduct({ name: data.name, price: data.price });
       } else {
-        // APIが404 Not Foundならエラーメッセージを表示
         setError('商品が見つかりませんでした');
       }
     } catch (err) {
